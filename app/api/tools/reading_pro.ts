@@ -13,7 +13,7 @@ export const reading_pro = {
 
 export async function reading_pro_api({threadId}:{threadId: string}) {
   try {
-    const article = await prisma.stage.findFirst({
+    const article = await prisma.chatStage.findFirst({
       where: {
         threadId: threadId
       }
