@@ -2,6 +2,7 @@ import { fileService } from "@/app/services/file";
 import { cn } from "@/lib/utils";
 import { useRequest } from "ahooks";
 import { DownloadIcon, FileIcon } from "lucide-react";
+import Image from "next/image";
 
 export const FilePreview = ({
   fileId,
@@ -17,10 +18,10 @@ export const FilePreview = ({
   });
   if (isImage) {
     return (
-      <img
+      <Image
         className={cn('mt-2 max-w-[500px] w-full', className)}
         src={`/api/file/download/${fileId}`}
-        alt={file?.filename}
+        alt={file?.filename??'Image'}
       />
     );
   }
