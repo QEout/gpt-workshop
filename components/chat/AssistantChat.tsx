@@ -19,7 +19,8 @@ const AssistantChat = (
             m.role === 'user' ? 'items-end' : 'items-start'
           )}>
             {m.role !== 'data' && <NormalMessage m={m} />}
-            {m.role === 'data' && <DataMessage m={m} editor={editor} /> }
+            {m.role === 'data' &&
+              <DataMessage m={m} editor={editor} />}
           </div>
         )
       })}

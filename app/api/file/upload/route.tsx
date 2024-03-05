@@ -13,15 +13,12 @@ const openai = new OpenAI({
 export async function POST(request: NextRequest) {
   // Logging the start of the upload process
   try {
-    console.log(`Upload API call started`);
-
     // Retrieving the file from the form data
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
 
     // Check if a file was provided in the request
     if (!file) {
-      console.log('No file found in the request');
       return NextResponse.json({ success: false });
     }
 

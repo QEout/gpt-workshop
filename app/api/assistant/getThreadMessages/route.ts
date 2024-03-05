@@ -19,18 +19,7 @@ export async function POST(req: NextRequest) {
       order: "asc",
     });
 
-    const formattedMsgs: Message[] = messages.data.map((msg) => {
-      const content = msg.content[0];
-      return {
-        id: msg.id,
-        content: content.type === "text" ? content.text.value : "",
-        annotations:
-          content.type === "text" ? (content.text.annotations as any) : [],
-        created: msg.created_at,
-        role: msg.role,
-      };
-    });
-    return NextResponse.json(formattedMsgs);
+    return NextResponse.json(messages.data);
   } catch (error) {
     return throwError(error);
   }

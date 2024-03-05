@@ -6,6 +6,8 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Editor } from "@tiptap/core";
 import { PauseIcon, Repeat2Icon } from "lucide-react";
+import { ThreadMessage } from "openai/resources/beta/threads/messages/messages.mjs";
+import { FilePreview } from "./FilePreview";
 
 const roleToColorMap: Record<Message['role'], string> = {
   system: 'red',
@@ -16,20 +18,79 @@ const roleToColorMap: Record<Message['role'], string> = {
   data: 'orange',
 };
 
-export interface IChatMessage extends Message {
-  data?: {
-    type?: string;
-    message?: string;
-    function?: string;
-    input?: string;
-    output?: string;
-    annotations?: any[]
-  }
+export type IMessageData = {
+  type?: string;
+  message?: string;
+  function?: string;
+  input?: string;
+  output?: string;
+  threadMessage?: IThreadMessage
 }
 
-export const NormalMessage = ({ m }: { m: IChatMessage }) => {
+export interface IChatMessage extends Omit<Message, 'data' | 'content'> {
+  data?: IMessageData
+  content: string;
+}
+
+export interface IThreadMessage extends Omit<IChatMessage, 'content'> {
+  content?: ThreadMessage['content'] | string;
+  created_at?: number;
+  file_ids?: string[];
+}
+
+export const ThreadMessageContent = ({ content, isMarkdown = true }: { content: IThreadMessage['content'], isMarkdown?: boolean }) => {
+  return !content ? null : (
+    <div className={cn("w-fit prose max-w-full bg-gray-100 px-3 rounded-lg", {
+      'whitespace-pre-wrap py-3': !isMarkdown,
+    })}>
+      {
+        typeof content === 'string' ? content :
+          <>
+            {content.map((item, index) => {
+              if (item.type === 'text' && item.text.annotations.length) {
+                const annotations = item.text.annotations;
+                return <div key={index} className='flex mt-3 flex-wrap gap-2'>
+                  {annotations.map((annotation: any, index) => {
+                    return <>
+                      {annotation?.file_citation && (
+                        <div className='text-sm text-gray-400'>
+                          [{index}] {annotation?.file_citation.quote} from {annotation.file_citation.file_id}
+                        </div>
+                      )}
+                      {annotation?.file_path && (
+                        <div className='text-sm text-gray-400'>
+                          Click <a href={'/api/file/download/' + annotation.file_path.file_id} download className='text-primary'>here</a> to download {annotation.file_path.file_id}
+                        </div>
+                      )}
+                    </>
+                  }
+                  )}
+                </div>
+              }
+              if (item.type === 'image_file') {
+                return (
+                  <FilePreview key={index} fileId={item.image_file.file_id} isImage />
+                )
+              }
+              return isMarkdown ?
+                <Markdown linkTarget="_blank" className='a-markdown'>
+                  {item.text.value}
+                </Markdown> :
+                item.text.value
+            }
+            )}
+          </>
+      }
+    </div>
+  )
+}
+
+export const NormalMessage = ({ m }: { m: IThreadMessage }) => {
   return (
-    <>
+    <div className={cn('flex flex-col gap-2',
+      m.role === 'user' ? 'items-end' : 'items-start'
+    )}
+    >
       <div className={cn('flex items-center gap-2', m.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
         <div className='rounded-full p-2 w-8 h-8 flex items-center justify-center text-white text-sm font-bold'
           style={{ backgroundColor: roleToColorMap[m.role] }}
@@ -38,19 +99,25 @@ export const NormalMessage = ({ m }: { m: IChatMessage }) => {
         >
           {m.role.slice(0, 1)}
         </div>
-        <div className='flex flex-col'>
+        <div className={cn('flex flex-col'
+          , m.role === 'user' ? 'items-end' : 'items-start')}>
           <div className='text-sm text-gray-400'>{m.role}</div>
-          {m.createdAt && <div className='text-xs text-gray-300'>{format(new Date(m.createdAt), 'MM-dd HH:mm:ss')}</div>}
+          {m.created_at && <div className='text-xs text-gray-300'>{format(new Date(m.created_at), 'MM-dd HH:mm:ss')}</div>}
         </div>
       </div>
-      {m.role === 'user' ?
-        <div className=" w-fit whitespace-pre-wrap max-w-full bg-gray-100 p-3 rounded-lg">
-          {m.content}
-        </div> :
-        <Markdown linkTarget="_blank" className='a-markdown w-fit prose max-w-full bg-gray-100 p-3 rounded-lg'>
-          {m.content}
-        </Markdown>}
-    </>
+      <ThreadMessageContent content={m.content} isMarkdown={m.role !== 'user'} />
+      {
+        m.file_ids?.length ? (
+          <div className='flex gap-2'>
+            {m.file_ids.map((fileId, index) => {
+              return (
+                <FilePreview key={index} fileId={fileId} />
+              )
+            })}
+          </div>
+        ) : null
+      }
+    </div>
   )
 }
 
@@ -102,7 +169,7 @@ export const NormalChatMessage = ({ m, reload, stop, isLoading, isLast }: {
         }
       </div>
       {m.role === 'user' ?
-        <div className=" w-fit whitespace-pre-wrap max-w-full bg-gray-100 p-3 rounded-lg">
+        <div className="w-fit whitespace-pre-wrap max-w-full bg-gray-100 p-3 rounded-lg">
           {m.content}
         </div> :
         <Markdown linkTarget="_blank" className='a-markdown w-fit prose max-w-full bg-gray-100 p-3 rounded-lg'>
@@ -166,7 +233,6 @@ export const WritingMessage = ({ m, editor }: { m: IChatMessage, editor?: Editor
 }
 
 export const DataMessage = ({ m, editor }: { m: IChatMessage, editor?: Editor | null }) => {
-
   return (
     <>
       {m.data?.type === 'tool_call' && (
@@ -179,34 +245,12 @@ export const DataMessage = ({ m, editor }: { m: IChatMessage, editor?: Editor | 
           {m.data?.message}
         </div>
       )}
-      {m.data?.type === 'annotation_output' && (
-        <div className="flex flex-wrap gap-2">
-          {
-            m.data?.annotations?.map((annotation, index) => {
-              return (
-                <div key={index} className='flex flex-col gap-2'>
-                  {annotation.file_citation && (
-                    <div className='text-sm text-gray-400'>
-                      [{index}] {annotation.file_citation.quote} from {annotation.file_citation.file_id}
-                    </div>
-                  )}
-                  {annotation.file_path && (
-                    <div className='text-sm text-gray-400'>
-                      Click <a href={'/api/file/download/' + annotation.file_path.file_id} download className='text-primary'>here</a> to download {annotation.file_path.file_id}
-                    </div>
-                  )}
-                </div>
-              )
-            })
-          }
-        </div>
-      )
-      }
-
-
       {m.data?.type === 'tool_output' && m.data.function === 'writing_pro' &&
-        <WritingMessage m={m} editor={editor} />}
-
+        <WritingMessage m={m} editor={editor} />
+      }
+      {
+        m.data?.type === 'thread_message' && <NormalMessage m={m.data.threadMessage!} />
+      }
       {m.data?.type === 'tool_output' && m.data.function !== 'writing_pro' &&
         <Popover>
           <PopoverTrigger>

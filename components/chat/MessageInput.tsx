@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from "@/components/ui/button";
 import UploadFiles, { FileData } from "@/components/upload";
-import { PencilLineIcon, Settings, SettingsIcon, ThermometerIcon, UploadCloudIcon } from 'lucide-react';
+import { PencilLineIcon, SettingsIcon, ThermometerIcon, UploadCloudIcon } from 'lucide-react';
 import { Slider } from '../ui/slider';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Switch } from '../ui/switch';
@@ -99,14 +99,16 @@ const MessageInput: React.FC<MessageInputProps> = ({ files, setFiles, submitMess
             }
           />
           <div className="w-full justify-between items-center flex gap-2 ">
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-1'>
               <Popover onOpenChange={(e) => {
                 if (!e) {
                   onSaveConfig?.();
                 }
               }}>
                 <PopoverTrigger>
-                  <SettingsIcon className="cursor-pointer" size={20} />
+                  <div className='px-2 py-1 hover:bg-gray-100 rounded-md cursor-pointer'>
+                  <SettingsIcon  size={20} />
+                  </div>
                 </PopoverTrigger>
                 <PopoverContent align='start' className='rounded-lg flex flex-col gap-3 drop-shadow !w-56'>
                   {config?.temperature !== undefined &&
@@ -152,14 +154,14 @@ const MessageInput: React.FC<MessageInputProps> = ({ files, setFiles, submitMess
               {files && setFiles && (
                 <Popover>
                   <PopoverTrigger>
-                    <div className="flex items-center gap-1 cursor-pointer">
-                      <UploadCloudIcon size={20} />
+                    <div className="flex relative px-2 py-1 hover:bg-gray-100 rounded-md items-end gap-px cursor-pointer">
+                      <UploadCloudIcon size={20} className='z-50' />
                       {
-                        files.length >0?<div className='bg-blue-500 text-white px-1 rounded'>{files.length}</div>:null
+                        files.length >0?<div className='bg-blue-500 text-xs text-white h-4 px-1 leading-4 rounded-full'>{files.length}</div>:null
                       }
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent align='start' className='rounded-lg flex flex-col gap-3 drop-shadow !w-56'>
+                  <PopoverContent align='start' className='rounded-lg flex flex-col gap-3 drop-shadow !w-72'>
                     <UploadFiles files={files} setFiles={setFiles} />
                   </PopoverContent>
                 </Popover>

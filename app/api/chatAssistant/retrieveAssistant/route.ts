@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
       if(!id){
         throw new Error("Missing required assistantId")
       }
-      const thread = await prisma.chatAssistant.findUnique({
+      const assistant = await prisma.chatAssistant.findUnique({
         where: { id }
       })
 
-      return NextResponse.json(thread);
+      return NextResponse.json(assistant);
     } catch (error) {
       return throwError(error);
     }

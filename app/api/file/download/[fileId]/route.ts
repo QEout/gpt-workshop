@@ -7,6 +7,9 @@ const openai = new OpenAI({
   baseURL: process.env.OPENAI_BASE_URL,
 });
 
+// IMPORTANT! Set the runtime to edge
+export const runtime = 'edge';
+
 export async function GET(
   req: NextRequest,
   context: { params: { fileId: string } }
@@ -15,14 +18,14 @@ export async function GET(
   const fileId= context.params.fileId;
   const fileInfo = await openai.files.retrieve(fileId);
   const fileContent = await openai.files.content(fileId);
-  const bytes = await fileContent.arrayBuffer();
+  //读取文件然后保存在临时目录，然后返回
+  const bytes= await fileContent.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  // 发送文件流让浏览器下载, nextjs 14
-    return new NextResponse(buffer,{
-      headers: {
-        "Content-Disposition": `attachment; filename="${fileInfo.filename}"`,
-      },
-    })
+  return new NextResponse(buffer, {
+    headers: {
+      "Content-Disposition": `attachment; filename=${fileInfo.filename}`,
+    },
+  });
   } catch (error) {
     return throwError(error);
   }

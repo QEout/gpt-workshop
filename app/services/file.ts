@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import { IRequest, request } from "./request";
 
 export class FileService {
@@ -19,10 +20,19 @@ export class FileService {
 
   public deleteFile = (fileId: string) => {
     return this.request<boolean>("/api/file/deleteFile", {
-      method: "DELETE",
       body: { fileId },
     });
   };
+
+  public retrieveFile = (fileId: string) => {
+    return this.request<OpenAI.FileObject>('/api/file/retrieveFile', {
+      body: { fileId },
+    });
+  }
+
+  public downloadFile = (fileId: string) => {
+    return this.request<Blob>(`/api/file/download/${fileId}`);
+  }
 
 }
 

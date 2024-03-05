@@ -84,7 +84,7 @@ const StagPage = (props: {
   const msgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (msgRef.current) {
+    if (msgRef.current && msgRef.current.scrollHeight-msgRef.current.scrollTop<800) {
       msgRef.current.scrollTop = msgRef.current.scrollHeight;
     }
   }, [messages]);

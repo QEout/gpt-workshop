@@ -79,30 +79,21 @@ const UploadFile: React.FC<UploadFilesProps> = ({ files, setFiles }) => {
       <div className="w-full flex flex-col gap-2">
         <div className="flex flex-wrap gap-2">
           {files.map((file, index) => (
-            <div key={index} className="bg-gray-200 rounded-lg p-2 relative">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-2 flex-grow">
-                  <span className={`h-3 w-3 rounded-full ${file.status === 'uploading' ? 'bg-orange-500' : file.fileId ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <div className="truncate flex-grow">
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <p className="font-medium truncate">{file.name.length > 20 ? `${file.name.substring(0, 20)}...` : file.name}</p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {`Filename: ${file.name}`}
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
+            <div key={index} className="w-full rounded-lg p-2 relative">
+              <div className="flex justify-between items-center ">
+                <div className="flex items-center space-x-2 truncate">
+                  <div className={`h-3 w-3 rounded-full  ${file.status === 'uploading' ? 'bg-orange-500' : file.fileId ? 'bg-green-500' : 'bg-red-500'}`}/>
+                  <div className='truncate flex-1' title={file.name} >{file.name}</div>
                 </div>
                 {file.fileId && file.status === 'uploaded' && (
-                  <div className="flex-shrink-0 ml-1">
+                  <div className="flex-1 ml-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start" className='bg-gray-200 border-gray-500'>
+                      <DropdownMenuContent align="start" className=''>
                         <DropdownMenuItem
                           onClick={() => file.fileId && navigator.clipboard.writeText(file.fileId)}
                         >
@@ -121,7 +112,7 @@ const UploadFile: React.FC<UploadFilesProps> = ({ files, setFiles }) => {
             </div>
           ))}
         </div>
-        <div>
+        <div >
           <button
             className="bg-gray-200 text-gray-800 uppercase font-bold text-sm px-6 py-2 rounded shadow hover:bg-gray-300"
             onClick={(e) => {

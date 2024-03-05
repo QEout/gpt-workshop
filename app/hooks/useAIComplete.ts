@@ -26,7 +26,7 @@ export const useAIComplete = ({
   return {
     config,
     setConfig,
-    suggestions: completion.split("||"),
+    suggestions: completion?completion.split("||"):[],
     complete: (e: string) => (config.suggestion ? complete(e) : null),
   };
 };

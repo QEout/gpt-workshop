@@ -22,7 +22,7 @@ const StagPage = (props: {
 }) => {
   const assistantId = props.params.assistantId;
   const thId = props.searchParams.threadId;
-  const router=useRouter();
+  const router = useRouter();
   const [threadFiles, setThreadFiles] = useState<FileData[]>([]);
   const { data: assistant } = useRequest(() => assistantService.retrieveAssistant(assistantId), {
     ready: !!assistantId,
@@ -45,9 +45,9 @@ const StagPage = (props: {
   });
 
   const { data: initialMessages } = useRequest(() => assistantService.getThreadMessages({ threadId: thId }), {
-    ready: !!thId&&!threadId,
+    ready: !!thId && !threadId,
   })
-  const {complete,...rest}=useAIComplete({type: 'assistant'});
+  const { complete, ...rest } = useAIComplete({ type: 'assistant' });
   const { data: stage } = useRequest(() => chatStageService.retrieveStage(assistantId, thId), {
     ready: !!thId,
     refreshDeps: [assistantId, thId]
@@ -66,10 +66,10 @@ const StagPage = (props: {
   }, [stage])
 
   const showWriting = useMemo(() =>
-    assistant?.tools.find((tool) => tool.type === 'function' && tool.function.name === 'writing_pro') !== undefined 
+    assistant?.tools.find((tool) => tool.type === 'function' && tool.function.name === 'writing_pro') !== undefined
     , [assistant]);
 
-  const editorRef=useRef<IAIEditorRef>(null);
+  const editorRef = useRef<IAIEditorRef>(null);
 
   const msgRef = useRef<HTMLDivElement>(null);
 
@@ -80,18 +80,16 @@ const StagPage = (props: {
   }
     , [messages.length]);
 
-    useEffect(() => {
-      if(status === 'awaiting_message'){
-        if(messages[messages.length - 1]?.role === 'assistant'){
-          complete(messages[messages.length - 1].content);
-        }
-        setThreadFiles([]);
+  useEffect(() => {
+    if (status === 'awaiting_message') {
+      if (messages[messages.length - 1]?.role === 'assistant') {
+        complete(messages[messages.length - 1].content);
       }
+      setThreadFiles([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status]);
-
-    console.log(messages)
-
+  }, [status]);
+  
   return (
     <div className='w-screen h-screen flex'>
       <div className={cn("h-screen p-8 pt-5 flex flex-col gap-6"
@@ -125,8 +123,8 @@ const StagPage = (props: {
           />
         </div>
       </div>
-      { showWriting &&
-         <div className="w-1/2 h-screen p-8 pl-4 pt-5">
+      {showWriting &&
+        <div className="w-1/2 h-screen p-8 pl-4 pt-5">
           <AIEditor stageId={stage?.id!}
             ref={editorRef}
             defaultContent={content}

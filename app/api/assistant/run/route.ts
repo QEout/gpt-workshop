@@ -1,9 +1,8 @@
-import { experimental_AssistantResponse } from "ai";
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-import { MessageContentText } from "openai/resources/beta/threads/messages/messages";
-import { setToolOutput } from "../../tools/utils";
-import { throwError } from "@/app/utils/throwError";
+import { experimental_AssistantResponse } from 'ai';
+import { NextRequest } from 'next/server';
+import OpenAI from 'openai';
+import { setToolOutput } from '../../tools/utils';
+import { throwError } from '@/app/utils/throwError';
 
 // Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
@@ -12,7 +11,7 @@ const openai = new OpenAI({
 });
 
 // IMPORTANT! Set the runtime to edge
-export const runtime = "edge";
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   // Parse the request body
@@ -27,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   // Add a message to the thread
   const createdMessage = await openai.beta.threads.messages.create(threadId, {
-    role: "user",
+    role: 'user',
     content: input.message,
     file_ids: input.fileIds,
   });
@@ -41,16 +40,16 @@ export async function POST(req: NextRequest) {
         });
         if (input.fileIds?.length) {
           sendDataMessage({
-            role: "data",
+            role: 'data',
             data: {
-              type: "user_input",
+              type: 'user_input',
               message: `上传了${input.fileIds.length}个文件`,
             },
           });
         }
         async function waitForRun(run: OpenAI.Beta.Threads.Runs.Run) {
           // Poll for status change
-          while (run.status === "queued" || run.status === "in_progress") {
+          while (run.status === 'queued' || run.status === 'in_progress') {
             // delay for 500ms:
             await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -59,17 +58,17 @@ export async function POST(req: NextRequest) {
 
           // Check the run status
           if (
-            run.status === "cancelled" ||
-            run.status === "cancelling" ||
-            run.status === "failed" ||
-            run.status === "expired"
+            run.status === 'cancelled' ||
+            run.status === 'cancelling' ||
+            run.status === 'failed' ||
+            run.status === 'expired'
           ) {
             throw new Error(run.status);
           }
 
           if (
-            run.status === "requires_action" &&
-            run.required_action?.type === "submit_tool_outputs"
+            run.status === 'requires_action' &&
+            run.required_action?.type === 'submit_tool_outputs'
           ) {
             const tool_outputs: OpenAI.Beta.Threads.Runs.RunSubmitToolOutputsParams.ToolOutput[] =
               [];
@@ -83,7 +82,7 @@ export async function POST(req: NextRequest) {
                   sendDataMessage
                 );
               } catch (e) {
-                console.error("setToolOutput error:", e);
+                console.error('setToolOutput error:', e);
               }
             }
             run = await openai.beta.threads.runs.submitToolOutputs(
@@ -103,33 +102,17 @@ export async function POST(req: NextRequest) {
         const responseMessages = (
           await openai.beta.threads.messages.list(threadId, {
             after: createdMessage.id,
-            order: "asc",
+            order: 'asc',
           })
         ).data;
-        console.log("responseMessages:", responseMessages);
-        // Send the messages
         for (const message of responseMessages) {
-          sendMessage({
-            id: message.id,
-            role: "assistant",
-            content: message.content.filter(
-              (content) => content.type === "text"
-            ) as Array<MessageContentText>,
+          sendDataMessage({
+            role: 'data',
+            data: {
+              type: 'thread_message',
+              threadMessage: message,
+            } as any,
           });
-          if (
-            message.content[0].type === "text" &&
-            message.content[0].text.annotations
-          ) {
-            const annotations = message.content[0].text.annotations;
-            sendDataMessage({
-              role: "data",
-              data: {
-                type: "annotation_output",
-                message: "生成了一些注释",
-                annotations: annotations as any,
-              },
-            });
-          }
         }
       }
     );
