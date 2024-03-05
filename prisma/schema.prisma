@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ChatStage {
+  id          String   @id @default(uuid())
+  content     String?
+  assistantId String
+  threadId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChatAssistant {
+  id           String   @id @default(uuid())
+  name         String
+  model        String
+  toolNames    String[]
+  temperature  Float?
+  instructions String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ChatThread {
+  id          String   @id @default(uuid())
+  assistantId String
+  messages    Json[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+model Workshop {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  projects    WorkshopProject[] @relation("WorkshopProject")
+  members     String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WorkshopProject {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  workshopId  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  workshop    Workshop  @relation("WorkshopProject", fields: [workshopId], references: [id])
+}
+
