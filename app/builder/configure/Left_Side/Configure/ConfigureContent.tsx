@@ -41,22 +41,22 @@ const ConfigureContent = () => {
     });
   }, [assistant, form]);
 
-  const { data: fileDatas } = useRequest(() => assistantService.getFileData(assistant?.file_ids), {
-    ready: !!assistant?.file_ids.length,
-    refreshDeps: [assistant?.file_ids]
-  })
+  // const { data: fileDatas } = useRequest(() => assistantService.getFileData(assistant?.file_ids), {
+  //   ready: !!assistant?.file_ids.length,
+  //   refreshDeps: [assistant?.file_ids]
+  // })
 
-  useEffect(() => {
-    if (fileDatas) {
+  // useEffect(() => {
+  //   if (fileDatas) {
 
-      setFiles(fileDatas.map((fileData) => ({
-        name: fileData.filename,
-        fileId: fileData.id,
-        status: 'uploaded'
-      })))
+  //     setFiles(fileDatas.map((fileData) => ({
+  //       name: fileData.filename,
+  //       fileId: fileData.id,
+  //       status: 'uploaded'
+  //     })))
 
-    }
-  }, [fileDatas])
+  //   }
+  // }, [fileDatas])
 
   return (
     <FormProvider {...form}>

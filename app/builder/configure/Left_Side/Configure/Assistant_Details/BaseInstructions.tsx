@@ -43,8 +43,8 @@ const BaseInstructions = ({ form }:
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                  <SelectItem value="gpt-4-turbo-preview">GPT-4 Turbo</SelectItem>
+                  <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                  <SelectItem value="gpt-4">GPT-4</SelectItem>
                 </SelectContent>
               </Select>
             </FormControl>

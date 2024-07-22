@@ -15,7 +15,7 @@ export async function request<T>(
   }
   const finalOptions = Object.assign({}, defaultOptions, options);
   try {
-    const response = await fetch(url, finalOptions);
+    const response = await fetch(process.env.NEXT_PUBLIC_API_URL+url, finalOptions);
     if (!response.ok) {
       throw new Error(response.statusText);
     }

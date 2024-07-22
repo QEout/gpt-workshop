@@ -1,19 +1,19 @@
 import { reading_pro, reading_pro_api } from './reading_pro';
 import { suggestion } from './suggestion';
-import { AssistantCreateParams } from "openai/resources/beta/assistants/assistants.mjs";
 import { web_research_api, web_search } from "./web_research";
 import { writing_pro, writing_pro_api } from "./writing_pro";
 import OpenAI from 'openai';
 import { DataMessage } from 'ai';
+import { CodeInterpreterTool, FileSearchTool, FunctionTool } from 'openai/resources/beta/assistants.mjs';
 
 export const toolMap: Record<
   string,
-  | AssistantCreateParams.AssistantToolsCode
-  | AssistantCreateParams.AssistantToolsRetrieval
-  | AssistantCreateParams.AssistantToolsFunction
+  | CodeInterpreterTool
+  | FileSearchTool
+  | FunctionTool
 > = {
-  retrieval: {
-    type: "retrieval",
+  file_search: {
+    type: "file_search",
   },
   web_research: {
     type: "function",
@@ -49,7 +49,7 @@ export const tools = [
   },
   {
     name: "知识检索",
-    alias: "retrieval",
+    alias: "file_search",
     description: "从给定的知识源中检索知识。",
   },
   {

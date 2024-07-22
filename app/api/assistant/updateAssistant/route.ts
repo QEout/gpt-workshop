@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { OpenAI } from "openai";
+import { NextRequest, NextResponse } from 'next/server';
+import { OpenAI } from 'openai';
 
-import { AssistantCreateParams } from "openai/resources/beta/assistants/assistants.mjs";
-import { IUpdateAssistantInput } from "@/app/types";
-import { toolMap } from "../../tools/utils";
-import { throwError } from "@/app/utils/throwError";
+import { AssistantCreateParams } from 'openai/resources/beta/assistants';
+import { IUpdateAssistantInput } from '@/app/types';
+import { toolMap } from '../../tools/utils';
+import { throwError } from '@/app/utils/throwError';
+import { azureOpenAI } from '../../utils/azureInstance';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL,
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,9 +14,9 @@ export async function POST(req: NextRequest) {
       (await req.json()) as IUpdateAssistantInput;
 
     if (!name || !model || !instructions) {
-      throw new Error("Missing required assistant parameters");
+      throw new Error('Missing required assistant parameters');
     }
-    const tools: AssistantCreateParams["tools"] = [];
+    const tools: AssistantCreateParams['tools'] = [];
     // 添加工具
     for (const toolName of toolNames) {
       const tool = toolMap[toolName];
@@ -33,13 +30,13 @@ export async function POST(req: NextRequest) {
       model,
       tools,
     };
-    if (fileIds) {
-      assistantOptions.file_ids = fileIds;
-    }
+    // if (fileIds) {
+    //   assistantOptions.file_ids = fileIds;
+    // }
 
     const assistant = id
-      ? await openai.beta.assistants.update(id, assistantOptions)
-      : await openai.beta.assistants.create(assistantOptions);
+      ? await azureOpenAI.beta.assistants.update(id, assistantOptions)
+      : await azureOpenAI.beta.assistants.create(assistantOptions);
     return NextResponse.json(assistant);
   } catch (error) {
     return throwError(error);

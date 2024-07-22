@@ -78,7 +78,7 @@ const BuilderPage = () => {
                       )}
                   </div>
                   <span className='text-gray-400 text-sm'>
-                    {format(new Date(item.createdAt), 'yyyy-MM-dd HH:mm:ss')}
+                    {format(new Date(item.createdAt), 'yy-MM-dd HH:mm')}
                   </span>
                 </div>
               </div>

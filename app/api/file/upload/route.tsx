@@ -3,12 +3,8 @@ import { writeFile } from 'fs/promises';
 import { createReadStream, existsSync, mkdirSync, unlink } from 'fs';
 import OpenAI from "openai";
 import { throwError } from '@/app/utils/throwError';
+import { azureOpenAI } from '../../utils/azureInstance';
 
-// Initialize the OpenAI client with the API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL
-});
 
 export async function POST(request: NextRequest) {
   // Logging the start of the upload process
@@ -31,7 +27,7 @@ export async function POST(request: NextRequest) {
       mkdirSync(dir, { recursive: true });
     }
     await writeFile(path, buffer);
-    const fileForRetrieval = await openai.files.create({
+    const fileForRetrieval = await azureOpenAI.files.create({
       file: createReadStream(path),
       purpose: "assistants",
     });

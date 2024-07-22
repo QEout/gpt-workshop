@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import ChatAssistantChat from '@/components/chat/ChatAssistantChat';
 import MessageInput, { IInputConfigType } from '@/components/chat/MessageInput';
@@ -10,21 +11,20 @@ import { FileData } from '@/components/upload';
 
 const RightPanel = () => {
   const { assistant } = useAssistantContext();
-  const { complete, ...rest } = useAIComplete({ type: 'chat' });
+  // const { complete, ...rest } = useAIComplete({ type: 'chat' });
   const [steamReady, setStreamReady] = useState(false);
   const { id, createdAt, updatedAt, ...assistantData } = assistant || {};
   const { data, messages, reload, stop, isLoading, input, handleSubmit, handleInputChange } = useChat({
     api: '/api/chatAssistant/run',
     body: {
       ...assistantData,
-      temperature: rest.config.temperature,
+      // temperature: rest.config.temperature,
     },
     onResponse: () => {
       setStreamReady(true);
     },
-    onFinish: (res) => {
+    onFinish: () => {
       setStreamReady(false);
-      complete(res.content);
     },
     onError: (err) => {
       setStreamReady(false);
@@ -32,6 +32,8 @@ const RightPanel = () => {
       toast.error('发送消息失败');
     }
   });
+
+  console.log(data,messages)
 
   const msgRef = useRef<HTMLDivElement>(null);
 
@@ -59,7 +61,7 @@ const RightPanel = () => {
           handleInputChange={handleInputChange}
           submitMessages={handleSubmit}
           isLoading={isLoading}
-          {...rest}
+          // {...rest}
         />
       </div>
     </div>

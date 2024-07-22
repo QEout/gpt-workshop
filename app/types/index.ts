@@ -6,7 +6,8 @@ export type WithObj<T> = T & {
   updatedAt: Date
 };
 
-export type IUpdateAssistantInput = {
+export type IUpdateAssistantInput =
+ {
   id?: string;
   name: string;
   instructions: string;

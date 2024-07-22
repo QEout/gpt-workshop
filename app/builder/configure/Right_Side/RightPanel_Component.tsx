@@ -3,7 +3,7 @@ import AssistantChat from '@/components/chat/AssistantChat';
 import MessageInput from '@/components/chat/MessageInput';
 
 import {
-  experimental_useAssistant as useAssistant, useCompletion,
+   useAssistant, useCompletion,
 } from 'ai/react';
 import { useAssistantContext } from '../context/AssistantContext';
 import { useAIComplete } from '@/app/hooks/useAIComplete';

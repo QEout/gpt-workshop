@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import AssistantChat from '@/components/chat/AssistantChat';
 import MessageInput from '@/components/chat/MessageInput';
 import {
-  experimental_useAssistant as useAssistant, useCompletion,
+  useAssistant
 } from 'ai/react';
 import { useRequest } from 'ahooks';
 import { assistantService } from '@/app/services/assistant';
@@ -43,6 +43,7 @@ const StagPage = (props: {
       toast.error('发送消息失败');
     },
   });
+  console.log('status', status,messages);
 
   const { data: initialMessages } = useRequest(() => assistantService.getThreadMessages({ threadId: thId }), {
     ready: !!thId && !threadId,
