@@ -1,15 +1,12 @@
 import { reading_pro, reading_pro_api } from "./reading_pro";
-import { suggestion } from "./suggestion";
-import { AssistantCreateParams } from "openai/resources/beta/assistants/assistants.mjs";
 import { web_research_api, web_search } from "./web_research";
 import { writing_pro, writing_pro_api } from "./writing_pro";
 import OpenAI from "openai";
 import {
   CreateMessage,
-  DataMessage,
   JSONValue,
   ToolCallPayload,
-  experimental_StreamData,
+  StreamData,
 } from "ai";
 
 export const chatToolMap: Record<
@@ -27,11 +24,7 @@ export const chatToolMap: Record<
   reading_pro: {
     type: "function",
     function: reading_pro,
-  },
-  suggestion: {
-    type: "function",
-    function: suggestion,
-  },
+  }
 };
 
 export const chatTools = [
@@ -50,15 +43,10 @@ export const chatTools = [
     alias: "reading_pro",
     description: "阅读文章（建议和写作助手配对使用）。",
   },
-  {
-    name: "快捷输入建议",
-    alias: "suggestion",
-    description: "为用户的输入框提供快捷输入建议。",
-  },
 ];
 
 export const setChatToolOutput = async (
-  data: experimental_StreamData,
+  data: StreamData,
   /**
    * 调用的工具函数
    */

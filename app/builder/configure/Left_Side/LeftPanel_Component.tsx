@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 const LeftPanel = () => {
   const { assistant } = useAssistantContext();
   return (
-    <div className="w-1/2 h-screen overflow-y-auto  flex flex-col border-r border-gray-300">
+    <div className="w-1/3 h-screen overflow-y-auto  flex flex-col border-r border-gray-300">
       <div className="flex justify-between items-center mt-4 mx-4">
         <div className="flex gap-4 items-center">
           <Link href="/builder">

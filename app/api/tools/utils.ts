@@ -1,5 +1,4 @@
 import { reading_pro, reading_pro_api } from './reading_pro';
-import { suggestion } from './suggestion';
 import { web_research_api, web_search } from "./web_research";
 import { writing_pro, writing_pro_api } from "./writing_pro";
 import OpenAI from 'openai';
@@ -29,10 +28,6 @@ export const toolMap: Record<
   reading_pro: {
     type: "function",
     function: reading_pro
-  },
-  suggestion: {
-    type: "function",
-    function: suggestion
   }
 };
 
@@ -61,11 +56,6 @@ export const tools = [
     name: "阅读助手",
     alias: "reading_pro",
     description: "阅读文章（建议和写作助手配对使用）。",
-  },
-  {
-    name: "快捷输入建议",
-    alias: "suggestion",
-    description: "为用户的输入框提供快捷输入建议。",
   }
 ];
 

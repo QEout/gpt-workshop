@@ -112,7 +112,7 @@ const UploadFile: React.FC<UploadFilesProps> = ({ files, setFiles }) => {
             </div>
           ))}
         </div>
-        <div >
+        <div className='mx-auto'>
           <button
             className="bg-gray-200 text-gray-800 uppercase font-bold text-sm px-6 py-2 rounded shadow hover:bg-gray-300"
             onClick={(e) => {

@@ -16,7 +16,7 @@ const AssistantChat = ({
   return (
     <div className="flex flex-col w-full gap-4">
       {messages.map((message, idx) => {
-        const m = message as IChatMessage;
+        const m = message as unknown as IChatMessage;
         return (
           <div
             key={m.id + idx}

@@ -6,6 +6,7 @@ import { azureOpenAI } from "~/api/utils/azureInstance";
 export async function POST(req: NextRequest) {
   try {
     const assistants = await azureOpenAI.beta.assistants.list();
+    console.log(assistants);
     return NextResponse.json(assistants.data);
   } catch (error) {
     return throwError(error);

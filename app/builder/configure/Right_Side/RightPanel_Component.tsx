@@ -12,7 +12,7 @@ import { FileData } from '@/components/upload';
 const RightPanel = () => {
   const { assistant } = useAssistantContext();
   const [threadFiles, setThreadFiles] = useState<FileData[]>([]);
-  const { status, messages, threadId, input, submitMessage, handleInputChange } = useAssistant({
+  const { status, messages, threadId, input, submitMessage,handleInputChange } = useAssistant({
     api: '/api/assistant/run', body: {
       assistantId: assistant?.id,
       fileIds: threadFiles.map((file) => file.fileId),
@@ -39,7 +39,7 @@ const RightPanel = () => {
   }, [status]);
 
   return (
-    <div className="w-1/2 h-screen p-8 pr-0 pt-5 flex flex-col gap-6">
+    <div className="w-2/3 h-screen p-8 pr-0 pt-5 flex flex-col gap-6">
       <div className="flex items-center justify-between ">
         <span className=" font-semibold text-gray-400">Preview
           &nbsp;
@@ -58,7 +58,7 @@ const RightPanel = () => {
         <MessageInput
           input={input}
           handleInputChange={handleInputChange}
-          submitMessages={submitMessage}
+          submitMessage={submitMessage}
           isLoading={status !== "awaiting_message"}
           {...rest}
           files={threadFiles}

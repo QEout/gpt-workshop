@@ -9,10 +9,11 @@ import {
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Editor } from '@tiptap/core';
-import { PauseIcon, Repeat2Icon } from 'lucide-react';
 import { FilePreview } from './FilePreview';
+import rehypeRaw from 'rehype-raw';
 import { ThreadCreateParams } from 'openai/resources/beta/threads/threads';
-import { TextDelta } from 'openai/resources/beta/threads/messages.mjs';
+import { MessageContentDelta } from 'openai/resources/beta/threads/messages.mjs';
+import Image from 'next/image';
 
 const roleToColorMap: Record<Message['role'], string> = {
   system: 'red',
@@ -34,67 +35,75 @@ export type IMessageData = {
 
 export interface IChatMessage extends Omit<Message, 'data' | 'content'> {
   data?: IMessageData;
-  content: string;
+  content: MessageContentDelta[];
 }
 
 export interface IThreadMessage extends Omit<IChatMessage, 'content'> {
-  content?: ThreadCreateParams.Message['content'] | string;
+  content: MessageContentDelta[];
   created_at?: number;
   attachments?: ThreadCreateParams.Message['attachments'];
 }
 
 export const ThreadMessageContent = ({
   content,
-  isMarkdown = true,
 }: {
-  content: IThreadMessage['content'];
-  isMarkdown?: boolean;
+  content: MessageContentDelta[];
 }) => {
   return !content ? null : (
-    <div
-      className={cn('w-fit prose max-w-full bg-gray-100 px-3 rounded-lg', {
-        'whitespace-pre-wrap py-3': !isMarkdown,
-      })}
-      >
+    <div className={cn('w-fit prose max-w-[90%] bg-gray-100 px-3 rounded-lg')}>
       {typeof content === 'string' ? (
-        <Markdown linkTarget="_blank" className="a-markdown" 
-          key='markdown'>
-        {content}</Markdown>
+        <Markdown linkTarget="_blank" className="a-markdown" key="markdown">
+          {content}
+        </Markdown>
       ) : (
         <>
-          {content.map((item: any, index) => {
-            if (item.type === 'text' && item.text.annotations.length) {
-              const annotations: TextDelta['annotations'] =
-                item.text.annotations;
+          {content.map((item: MessageContentDelta, index) => {
+            if (item.type === 'text' && item.text?.annotations?.length) {
+              const annotations = item.text.annotations;
+              const pureCitations = annotations.filter(
+                (a) => a.type === 'file_citation'
+              );
+              const pureFilePaths = annotations.filter(
+                (a) => a.type === 'file_path'
+              );
+              let markdownVal = item.text.value ?? '';
+              // 把这个简历上的人名是曹伟力【8:0†source】。中的【8:0†source】去掉，用annotations 里的 file_citation 和 file_path 替换
+              pureCitations.forEach((citation, idx) => {
+                markdownVal = markdownVal?.replace(
+                  citation?.text!,
+                  `<sup>[[${idx}]](${
+                    '/api/file/download/' + citation.file_citation?.file_id
+                  })</sup>`
+                );
+              });
+
               return (
-                <div key={'content'+index} className="flex mt-3 flex-wrap gap-2">
-                  {annotations?.map((annotation: any, index) => {
-                    return (
-                      <div key={index}>
-                        {annotation?.file_citation && (
-                          <div className="text-sm text-gray-400">
-                            [{index}] {annotation?.file_citation.quote} from&npbs;
-                            {annotation.file_citation.file_id}
-                          </div>
-                        )}
-                        {annotation?.file_path && (
-                          <div className="text-sm text-gray-400">
-                            Click&npbs;
-                            <a
-                              href={
-                                '/api/file/download/' +
-                                annotation.file_path.file_id
-                              }
-                              download
-                              className="text-primary">
-                              here
-                            </a>&npbs;
-                            to download {annotation.file_path.file_id}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                <div key={'content' + index} className="flex flex-col">
+                  <Markdown
+                    linkTarget="_blank"
+                    className="a-markdown"
+                    rehypePlugins={[rehypeRaw]}
+                    key="markdown1">
+                    {markdownVal}
+                  </Markdown>
+                  <div className="flex flex-col gap-1">
+                    {pureFilePaths.map((filePath, idx) => {
+                      return (
+                        <div key={'file_path' + idx} className="flex gap-1">
+                          <span>{filePath.text}</span>
+                          <a
+                            href={
+                              '/api/file/download/' +
+                              filePath.file_path?.file_id
+                            }
+                            target="_blank"
+                            className="text-blue-500 underline">
+                            下载
+                          </a>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             }
@@ -102,19 +111,27 @@ export const ThreadMessageContent = ({
               return (
                 <FilePreview
                   key={index}
-                  fileId={item.image_file.file_id}
+                  fileId={item.image_file?.file_id!}
                   isImage
                 />
               );
             }
-            return isMarkdown ? (
-              <Markdown linkTarget="_blank" className="a-markdown"
-                key='markdown2'
-              >
-                {item.text.value}
+            if (item.type === 'image_url') {
+              return (
+                <Image
+                  key={index}
+                  src={item.image_url?.url!}
+                  alt={item.image_url?.detail!}
+                />
+              );
+            }
+            return (
+              <Markdown
+                linkTarget="_blank"
+                className="a-markdown"
+                key="markdown2">
+                {item.text?.value ?? ''}
               </Markdown>
-            ) : (
-              item.text.value
             );
           })}
         </>
@@ -127,7 +144,7 @@ export const NormalMessage = ({ m }: { m: IThreadMessage }) => {
   return (
     <div
       className={cn(
-        'flex flex-col gap-2',
+        'flex flex-col gap-2 w-full',
         m.role === 'user' ? 'items-end' : 'items-start'
       )}>
       <div
@@ -150,14 +167,12 @@ export const NormalMessage = ({ m }: { m: IThreadMessage }) => {
           <div className="text-sm text-gray-400">{m.role}</div>
           {m.created_at && (
             <div className="text-xs text-gray-300">
-              {format(new Date(m.created_at), 'MM-dd HH:mm:ss')}
+              {format(new Date(m.created_at * 1000), 'MM-dd HH:mm:ss')}
             </div>
           )}
         </div>
       </div>
-      <ThreadMessageContent content={m.content} isMarkdown={true} 
-        key={m.id}
-      />
+      <ThreadMessageContent content={m.content} key={m.id} />
       {m.attachments?.length ? (
         <div className="flex gap-2">
           {m.attachments.map((file, index) => {
@@ -165,89 +180,6 @@ export const NormalMessage = ({ m }: { m: IThreadMessage }) => {
           })}
         </div>
       ) : null}
-    </div>
-  );
-};
-
-export const NormalChatMessage = ({
-  m,
-  reload,
-  stop,
-  isLoading,
-  isLast,
-}: {
-  m: IChatMessage;
-  reload?: () => void;
-  stop?: () => void;
-  isLoading?: boolean;
-  isLast?: boolean;
-}) => {
-  return (
-    <div
-      className={cn(
-        'flex flex-col gap-2 group/msg',
-        m.role === 'user' ? 'items-end' : 'items-start'
-      )}>
-      <div
-        className={cn(
-          'flex items-center gap-2',
-          m.role === 'user' ? 'flex-row-reverse' : 'flex-row'
-        )}>
-        <div
-          className="rounded-full p-2 w-8 h-8 flex items-center justify-center text-white text-sm font-bold"
-          style={{ backgroundColor: roleToColorMap[m.role] }}
-          title={m.role}
-          data-testid="role-indicator">
-          {m.role.slice(0, 1)}
-        </div>
-        <div
-          className={cn(
-            'flex flex-col',
-            m.role === 'user' ? 'items-end' : 'items-start'
-          )}>
-          <div className="text-sm text-gray-400">{m.role}</div>
-          {m.createdAt && (
-            <div className="text-xs text-gray-300">
-              {format(new Date(m.createdAt), 'MM-dd HH:mm:ss')}
-            </div>
-          )}
-        </div>
-        {isLast && m.role === 'assistant' && (
-          <Button
-            variant="outline"
-            size="xs"
-            className="!py-0 !rounded-xl group/btn group-hover/msg:!flex hidden !w-fit items-center"
-            onClick={() => {
-              if (isLoading) {
-                stop?.();
-              } else {
-                reload?.();
-              }
-            }}>
-            {isLoading ? (
-              <PauseIcon className="h-4 w-4" />
-            ) : (
-              <Repeat2Icon className="h-4 w-4" />
-            )}
-            {
-              <div className="group-hover/btn:w-8 w-0 transition-all overflow-hidden">
-                {isLoading ? '停止' : '重试'}
-              </div>
-            }
-          </Button>
-        )}
-      </div>
-      {m.role === 'user' ? (
-        <div className="w-fit whitespace-pre-wrap max-w-full bg-gray-100 p-3 rounded-lg">
-          {m.content}
-        </div>
-      ) : (
-        <Markdown
-          linkTarget="_blank"
-          className="a-markdown w-fit prose max-w-full bg-gray-100 p-3 rounded-lg">
-          {m.content}
-        </Markdown>
-      )}
     </div>
   );
 };

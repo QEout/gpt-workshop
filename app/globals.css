@@ -82,3 +82,7 @@
   color: #1575c1 !important;
 }
 
+.a-markdown p {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}

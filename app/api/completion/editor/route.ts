@@ -3,7 +3,6 @@ import { OpenAIStream, StreamingTextResponse } from "ai";
 import { match } from "ts-pattern";
 import type { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import { azureOpenAI } from "../../utils/azureInstance";
-export const runtime = "edge";
 
 export async function POST(req: Request) {
 
@@ -90,7 +89,7 @@ export async function POST(req: Request) {
     .run() as ChatCompletionMessageParam[];
 
   const response = await azureOpenAI.chat.completions.create({
-    model: "gpt-35-turbo",
+    model: "gpt-35-turbo-16k",
     stream: true,
     messages,
     max_tokens: 200,

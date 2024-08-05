@@ -31,7 +31,7 @@ const StagPage = (props: {
   const [content, setContent] = useState('');
 
 
-  const { status, messages, threadId, input, submitMessage, handleInputChange } = useAssistant({
+  const { status, messages, threadId, input,submitMessage, handleInputChange } = useAssistant({
     api: '/api/assistant/run',
     threadId: thId,
     body: {
@@ -116,7 +116,7 @@ const StagPage = (props: {
           <MessageInput
             input={input}
             handleInputChange={handleInputChange}
-            submitMessages={submitMessage}
+            submitMessage={submitMessage}
             isLoading={status !== "awaiting_message"}
             files={threadFiles}
             setFiles={setThreadFiles}

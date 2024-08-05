@@ -7,9 +7,11 @@ import Image from "next/image";
 export const FilePreview = ({
   fileId,
   className,
+  showIcon=true,
   isImage = false
 }: {
   fileId: string,
+  showIcon?: boolean,
   className?: string,
   isImage?: boolean
 }) => {
@@ -26,8 +28,8 @@ export const FilePreview = ({
     );
   }
   return (
-    <div className={cn("flex gap-1 items-center text-sm px-2 py-1 text-gray-700 rounded-sm", className)}>
-      <FileIcon size={16} />
+    <div className={cn("flex gap-1 items-center text-sm px-2 text-gray-500 rounded-sm", className)}>
+      {showIcon&&<FileIcon size={16} />}
       <span>{file?.filename}</span>
       {file?.purpose !== 'assistants' && <a href={`/api/file/download/${fileId}`} download={file?.filename}>
         <DownloadIcon size={16} />
