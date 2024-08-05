@@ -84,6 +84,7 @@
     "react-hook-form": "^7.48.2",
     "react-hot-toast": "^2.4.1",
     "react-markdown": "^8.0.7",
+    "rehype-raw": "6.0.0",
     "react-modal": "^3.16.1",
     "react-moveable": "^0.56.0",
     "react-pdf": "^7.5.1",
@@ -95,7 +96,11 @@
     "tiptap-markdown": "^0.8.9",
     "ts-pattern": "5.0.8",
     "tunnel-rat": "^0.1.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "@monaco-editor/react": "^4.6.0",
+    "@webcontainer/api": "^1.1.5",
+    "@xterm/xterm": "^5.5.0",
+    "dockview": "^1.15.3"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
